@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import pandas as pd
 
 # Initialize the MediaPipe Hands module
 mp_hands = mp.solutions.hands
@@ -67,10 +68,15 @@ index_jerk = []
 for coords in [thumb_coordinates, index_coordinates]:
     # Calculate velocities
     velocities = np.diff(coords, axis=0)
+    print(f"Velocities: {velocities}")  # Debugging line
+
     # Calculate accelerations
     accelerations = np.diff(velocities, axis=0)
+    print(f"Accelerations: {accelerations}")  # Debugging line
+
     # Calculate jerk
     jerk = np.diff(accelerations, axis=0)
+    print(f"Jerk: {jerk}")  # Debugging line
 
     if coords is thumb_coordinates:
         thumb_velocities.append(velocities)
@@ -91,7 +97,8 @@ index_mean_jerk = np.mean(index_jerk, axis=0)
 
 new_features=[]
 new_features.append([np.mean(thumb_mean_velocity), np.mean(thumb_mean_acceleration), np.mean(thumb_mean_jerk), np.mean(index_mean_velocity), np.mean(index_mean_acceleration), np.mean(index_mean_jerk)])
-new_features = np.array(new_features)
 
-output_file = "new_features.txt"
-np.savetxt(output_file, new_features)
+
+column_headers = ['thumb_velocity', 'thumb_acceleration', 'thumb_jerk', 'index_velocity', 'index_acceleration', 'index_jerk']
+new_features_df = pd.DataFrame(new_features, columns=column_headers)
+new_features_df.to_excel("new_features.xlsx", index=False)

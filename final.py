@@ -1,25 +1,31 @@
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import numpy as np
+import pandas as pd
 
 # Load data
-data = np.loadtxt("kinematic_features.txt")
-new_data=np.loadtxt("new_features.txt")
-X = data
+data_df = pd.read_excel("kinematic_features.xlsx")
+new_data_df = pd.read_excel("new_features.xlsx")
+X = data_df.values
+new_data = new_data_df.values[0]
 y = np.concatenate((np.zeros(41), np.ones(55)))
 
 # Initialize classifiers
 tree = DecisionTreeClassifier()
 
 #perform training and testing of the model
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=4)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 tree.fit(X_train, y_train)
 
 # Predict the labels of the test set
 y_pred = tree.predict(X_test)
 y_new_pred=tree.predict(new_data.reshape(1, -1))  # Reshape new_data to 2D array
-print(y_new_pred)
+
+if y_new_pred==0:
+    print("The patient does not have Parkinson's disease.")
+else:
+    print("The patient has Parkinson's disease.")
 
 # Evaluate the model
 accuracy = accuracy_score(y_test, y_pred)
